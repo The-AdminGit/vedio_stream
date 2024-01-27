@@ -1,0 +1,11 @@
+{
+  "name": "04_vediosreming",
+  "version": "1.0.0",
+  "description": "A vedio sreaming app like youtube",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vivek kumar",
+  "license": "ISC"
+}
