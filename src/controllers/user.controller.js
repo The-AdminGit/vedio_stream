@@ -7,7 +7,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //steps:-
   //01 get user details from frontend
   const { fullName, email, username, password } = req.body;
-  console.log("emial", email);
+  // console.log("emial", email);
 
   //02 validation not enpty
 
@@ -23,8 +23,8 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "all field are required");
   }
 
-  //check if user already exists: username, email
-  const existUser = User.findOne({
+  //03 check if user already exists: username, email
+  const existUser = await User.findOne({
     $or: [{ username }, { email }],
   });
 
@@ -33,14 +33,27 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
-  //check for image check for avtar
+  //in case user not sent coverImage to how ho handle
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
+  //this method used
+
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
+
+  //04 check for image check for avtar
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
-  //uploade them to cloudinary, avatar
+
+  //05 uploade them to cloudinary, avatar
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
@@ -49,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw ApiError(400, "Avatar is required");
   }
 
-  //create user object - create entry in db
+  //06 create user object - create entry in db
 
   const user = await User.create({
     fullName,
@@ -60,17 +73,17 @@ const registerUser = asyncHandler(async (req, res) => {
     username: username.toLowerCase(),
   });
 
-  //remove password and refresh token field from response
+  //07 remove password and refresh token field from response
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
 
-  //check for user creation
+  //08 check for user creation
 
   if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering the user");
   }
-  //return res
+  //09 return res
 
   return res
     .status(201)
